@@ -88,6 +88,30 @@ class MeetupController {
 
     return res.json(meetup);
   }
+
+  async delete(req, res) {
+    const meetup = await Meetup.findOne({ where: { id: req.params.id } });
+
+    if (!meetup) {
+      return res.status(400).json({ error: 'Meetup not found' });
+    }
+
+    if (meetup.user_id !== req.userId) {
+      return res
+        .status(400)
+        .json({ error: 'You can only cancel meetups organized by you' });
+    }
+
+    if (meetup.past) {
+      return res
+        .status(400)
+        .json({ error: "you can't cancel meetups that already happened" });
+    }
+
+    await meetup.destroy();
+
+    return res.send();
+  }
 }
 
 export default new MeetupController();
