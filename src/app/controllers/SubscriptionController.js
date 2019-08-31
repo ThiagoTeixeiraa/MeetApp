@@ -1,6 +1,9 @@
 import { Op } from 'sequelize';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
+import User from '../models/User';
+import Queue from '../../lib/Queue';
+import SubscriptionMail from '../jobs/SubscriptionMail';
 
 class SubscriptionController {
   async index(req, res) {
@@ -29,6 +32,7 @@ class SubscriptionController {
       where: {
         id: req.params.meetupId,
       },
+      include: [User],
     });
 
     if (meetup.user_id === req.userId) {
@@ -78,6 +82,13 @@ class SubscriptionController {
     const subscription = await Subscription.create({
       user_id: req.userId,
       meetup_id: meetup.id,
+    });
+
+    const user = await User.findOne({ where: { id: req.userId } });
+
+    await Queue.add(SubscriptionMail.key, {
+      meetup,
+      user,
     });
 
     return res.json(subscription);
