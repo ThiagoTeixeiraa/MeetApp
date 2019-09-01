@@ -1,10 +1,21 @@
 import * as Yup from 'yup';
+import { Router } from 'express';
 import { Op } from 'sequelize';
 import { isBefore, startOfDay, endOfDay, parseISO } from 'date-fns';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import authMiddleware from '../middlewares/Auth';
 
 class MeetupController {
+  constructor() {
+    this.routes = Router();
+
+    this.routes.get('/meetups', authMiddleware, this.index);
+    this.routes.post('/meetups', authMiddleware, this.store);
+    this.routes.put('/meetups/:id', authMiddleware, this.update);
+    this.routes.delete('/meetups/:id', authMiddleware, this.delete);
+  }
+
   async index(req, res) {
     const where = {};
     const page = req.query.page || 1;
@@ -114,4 +125,4 @@ class MeetupController {
   }
 }
 
-export default new MeetupController();
+export default new MeetupController().routes;

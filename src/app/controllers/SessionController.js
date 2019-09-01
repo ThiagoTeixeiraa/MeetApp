@@ -1,8 +1,15 @@
+import { Router } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import AuthConfig from '../../config/Auth';
 
 class SessionController {
+  constructor() {
+    this.routes = Router();
+
+    this.routes.post('/sessions', this.store);
+  }
+
   async store(req, res) {
     const { email, password } = req.body;
     const user = await User.findOne({ where: { email } });
@@ -30,4 +37,4 @@ class SessionController {
   }
 }
 
-export default new SessionController();
+export default new SessionController().routes;

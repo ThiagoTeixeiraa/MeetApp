@@ -1,7 +1,17 @@
+import { Router } from 'express';
 import * as Yup from 'yup';
 import User from '../models/User';
 
+import authMiddleware from '../middlewares/Auth';
+
 class UserController {
+  constructor() {
+    this.routes = Router();
+
+    this.routes.post('/users', this.store);
+    this.routes.put('/users', authMiddleware, this.update);
+  }
+
   async store(req, res) {
     const schema = Yup.object().shape({
       name: Yup.string().required(),
@@ -78,4 +88,4 @@ class UserController {
   }
 }
 
-export default new UserController();
+export default new UserController().routes;

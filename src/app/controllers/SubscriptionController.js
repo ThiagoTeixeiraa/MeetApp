@@ -1,11 +1,24 @@
 import { Op } from 'sequelize';
+import { Router } from 'express';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
 import Queue from '../../lib/Queue';
 import SubscriptionMail from '../jobs/SubscriptionMail';
+import authMiddleware from '../middlewares/Auth';
 
 class SubscriptionController {
+  constructor() {
+    this.routes = Router();
+
+    this.routes.get('/subscriptions', authMiddleware, this.index);
+    this.routes.post(
+      '/meetups/:meetupId/subscriptions',
+      authMiddleware,
+      this.store
+    );
+  }
+
   async index(req, res) {
     const subscriptions = await Subscription.findAll({
       where: {
@@ -95,4 +108,4 @@ class SubscriptionController {
   }
 }
 
-export default new SubscriptionController();
+export default new SubscriptionController().routes;
